@@ -551,12 +551,14 @@ const state = {
   * Instantiate the Map
   */
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoiY2Fzc2lvemVuIiwiYSI6ImNqNjZydGl5dDJmOWUzM3A4dGQyNnN1ZnAifQ.0ZIRDup0jnyUFVzUa_5d1g";
+mapboxgl.accessToken = "pk.eyJ1IjoiamFjb2JyaWNvbnljIiwiYSI6ImNqZG1kbmlzYzBsOXAyd285OHplMzEwMGgifQ.T-crKdQoSyEJKUndYjSIFA";
+
+const fullstackCoords = [-74.009, 40.705] // NY
+// const fullstackCoords = [-87.6320523, 41.8881084] // CHI
 
 const map = new mapboxgl.Map({
   container: "map",
-  center: [-74.009, 40.705], // FullStack coordinates
+  center: fullstackCoords,
   zoom: 12, // starting zoom
   style: "mapbox://styles/mapbox/streets-v10" // mapbox has lots of different map styles available.
 });
@@ -572,6 +574,17 @@ api.fetchAttractions().then(attractions => {
   restaurants.forEach(restaurant => makeOption(restaurant, "restaurants-choices"));
   activities.forEach(activity => makeOption(activity, "activities-choices"));
 });
+
+// if there is a hash then fetchItinerary
+if(location.hash){
+  api.fetchItinerary(location.hash.slice(1))
+  .then((data)=>{
+    console.log(data.itinerary)
+    data.itinerary.hotels.forEach(hotel => buildAttractionAssets('hotels', hotel))
+    data.itinerary.restaurants.forEach(restaurant => buildAttractionAssets('restaurants', restaurant))
+    data.itinerary.activities.forEach(activity => buildAttractionAssets('activities', activity))
+})
+}
 
 const makeOption = (attraction, selector) => {
   const option = new Option(attraction.name, attraction.id); // makes a new option tag
@@ -647,7 +660,7 @@ const buildAttractionAssets = (category, attraction) => {
     console.log(state);
 
     // Animate map to default position & zoom.
-    map.flyTo({ center: [-74.0, 40.731], zoom: 12.3 });
+    map.flyTo({ center: fullstackCoords, zoom: 12.3 });
   });
 };
 
@@ -686,10 +699,16 @@ module.exports = g;
 const fetchAttractions = () =>
   fetch("/api")
     .then(result => result.json())
-    .catch(console.error);
+    .catch(err => console.error(err));
+
+const fetchItinerary = (hashed) => 
+  fetch(`/api/itineraries/${hashed}`)
+    .then(result => result.json())
+    .catch(err => console.error(err));
 
 module.exports = {
-  fetchAttractions
+  fetchAttractions,
+  fetchItinerary
 };
 
 

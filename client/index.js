@@ -15,7 +15,7 @@ const state = {
   * Instantiate the Map
   */
 
-mapboxgl.accessToken = "YOUR API TOKEN HERE";
+mapboxgl.accessToken = "pk.eyJ1IjoiamFjb2JyaWNvbnljIiwiYSI6ImNqZG1kbmlzYzBsOXAyd285OHplMzEwMGgifQ.T-crKdQoSyEJKUndYjSIFA";
 
 const fullstackCoords = [-74.009, 40.705] // NY
 // const fullstackCoords = [-87.6320523, 41.8881084] // CHI
@@ -38,6 +38,17 @@ api.fetchAttractions().then(attractions => {
   restaurants.forEach(restaurant => makeOption(restaurant, "restaurants-choices"));
   activities.forEach(activity => makeOption(activity, "activities-choices"));
 });
+
+// if there is a hash then fetchItinerary
+if(location.hash){
+  api.fetchItinerary(location.hash.slice(1))
+  .then((data)=>{
+    console.log(data.itinerary)
+    data.itinerary.hotels.forEach(hotel => buildAttractionAssets('hotels', hotel))
+    data.itinerary.restaurants.forEach(restaurant => buildAttractionAssets('restaurants', restaurant))
+    data.itinerary.activities.forEach(activity => buildAttractionAssets('activities', activity))
+})
+}
 
 const makeOption = (attraction, selector) => {
   const option = new Option(attraction.name, attraction.id); // makes a new option tag
